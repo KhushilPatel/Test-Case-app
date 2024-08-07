@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
-const TestCaseGeneratorForm = () => {
-  const [prompt, setPrompt] = useState('');
+const TestCaseSubmissionForm = () => {
+  const [testCases, setTestCases] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
-    setPrompt(e.target.value);
+    setTestCases(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -14,30 +14,26 @@ const TestCaseGeneratorForm = () => {
     setIsLoading(true);
 
     try {
-      // Call the GROQ API
+      // Parse the input JSON
+      const parsedTestCases = JSON.parse(testCases);
+
+      // Call the API to store test cases
       const response = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ testCases: parsedTestCases }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate test cases');
+        throw new Error('Failed to store test cases');
       }
 
       const data = await response.json();
 
-      // Store the result in Google Sheets
-      await fetch('/api/store-in-sheets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testCases: data.testCases }),
-      });
-
-      toast.success('Test cases generated and stored successfully!');
-      setPrompt('');
+      toast.success('Test cases stored successfully!');
+      setTestCases('');
     } catch (error) {
-      toast.error('An error occurred. Please try again.');
+      toast.error('An error occurred. Please check your input and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -94,22 +90,22 @@ const TestCaseGeneratorForm = () => {
         }
       `}</style>
 
-      <Toaster position="top-center" reverseOrder={false} />
+<Toaster position="top-center" reverseOrder={false} />
       <div className="form-wrapper">
         <div className="form-content">
-          <h3>Test Case Generator</h3>
+          <h3>Test Case Submission</h3>
           <form onSubmit={handleSubmit} className="space-y-6">
             <InputField
-              label="Enter your prompt"
-              name="prompt"
-              value={prompt}
+              label="Enter your test cases (JSON format)"
+              name="testCases"
+              value={testCases}
               onChange={handleChange}
               as="textarea"
               rows={10}
             />
             <div className="button-container">
               <button type="submit" className="button" disabled={isLoading}>
-                {isLoading ? 'Generating...' : 'Generate Test Cases'}
+                {isLoading ? 'Submitting...' : 'Submit Test Cases'}
               </button>
             </div>
           </form>
@@ -170,4 +166,4 @@ const InputField = ({ label, name, type = 'text', value, onChange, as, ...props 
   );
 };
 
-export default TestCaseGeneratorForm;
+export default TestCaseSubmissionForm;
