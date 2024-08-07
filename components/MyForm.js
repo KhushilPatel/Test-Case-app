@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const TestCaseSubmissionForm = () => {
   const [testCases, setTestCases] = useState('');
+  const [sheetId, setSheetId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
+  const [isNewSheetId, setIsNewSheetId] = useState(false);
+
+  useEffect(() => {
+    const storedSheetId = localStorage.getItem('sheetId');
+    if (storedSheetId) {
+      setSheetId(storedSheetId);
+    }
+  }, []);
 
   const handleChange = (e) => {
-    setTestCases(e.target.value);
+    if (e.target.name === 'testCases') {
+      setTestCases(e.target.value);
+    } else if (e.target.name === 'sheetId') {
+      setSheetId(e.target.value);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -16,14 +29,12 @@ const TestCaseSubmissionForm = () => {
     setIsLoading(true);
 
     try {
-      // Parse the input JSON
       const parsedTestCases = JSON.parse(testCases);
 
-      // Call the API to store test cases
       const response = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testCases: parsedTestCases }),
+        body: JSON.stringify({ testCases: parsedTestCases, sheetId }),
       });
 
       if (!response.ok) {
@@ -34,6 +45,11 @@ const TestCaseSubmissionForm = () => {
 
       toast.success('Test cases stored successfully!');
       setTestCases('');
+      
+      if (isNewSheetId) {
+        localStorage.setItem('sheetId', sheetId);
+        setIsNewSheetId(false);
+      }
     } catch (error) {
       toast.error('An error occurred. Please check your input and try again.');
     } finally {
@@ -43,13 +59,17 @@ const TestCaseSubmissionForm = () => {
 
   const handleAuthentication = (e) => {
     e.preventDefault();
-    // Replace 'your_secret_password' with an actual secure password
     if (password === '7984302453') {
       setIsAuthenticated(true);
       toast.success('Authentication successful!');
     } else {
       toast.error('Incorrect password. Please try again.');
     }
+  };
+
+  const handleNewSheetId = () => {
+    setIsNewSheetId(true);
+    setSheetId('');
   };
 
   return (
@@ -103,7 +123,7 @@ const TestCaseSubmissionForm = () => {
         }
       `}</style>
 
-      <Toaster position="top-center" reverseOrder={false} />
+<Toaster position="top-center" reverseOrder={false} />
       <div className="form-wrapper">
         <div className="form-content">
           {!isAuthenticated ? (
@@ -128,6 +148,21 @@ const TestCaseSubmissionForm = () => {
             <>
               <h3>Test Case Submission</h3>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {isNewSheetId || !sheetId ? (
+                  <InputField
+                    label="Google Sheet ID"
+                    name="sheetId"
+                    value={sheetId}
+                    onChange={handleChange}
+                  />
+                ) : (
+                  <div className="sheet-id-display">
+                    <p>Current Sheet ID: {sheetId}</p>
+                    <button type="button" onClick={handleNewSheetId} className="button">
+                      New Sheet ID
+                    </button>
+                  </div>
+                )}
                 <InputField
                   label="Enter your test cases (JSON format)"
                   name="testCases"

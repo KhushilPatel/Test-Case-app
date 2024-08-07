@@ -4,7 +4,7 @@ import { JWT } from 'google-auth-library';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { testCases } = req.body;
+      const { testCases ,sheetId} = req.body;
 
       // Set up Google Sheets
       const serviceAccountAuth = new JWT({
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
 
-      const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+      const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
       await doc.loadInfo();
       const sheet = doc.sheetsByIndex[0];
 
