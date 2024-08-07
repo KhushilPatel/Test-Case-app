@@ -59,7 +59,7 @@ const TestCaseSubmissionForm = () => {
 
   const handleAuthentication = (e) => {
     e.preventDefault();
-    if (password === '7984302453') {
+    if (password === '4411') {
       setIsAuthenticated(true);
       toast.success('Authentication successful!');
     } else {
