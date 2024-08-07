@@ -4,6 +4,8 @@ import toast, { Toaster } from 'react-hot-toast';
 const TestCaseSubmissionForm = () => {
   const [testCases, setTestCases] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
 
   const handleChange = (e) => {
     setTestCases(e.target.value);
@@ -36,6 +38,17 @@ const TestCaseSubmissionForm = () => {
       toast.error('An error occurred. Please check your input and try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAuthentication = (e) => {
+    e.preventDefault();
+    // Replace 'your_secret_password' with an actual secure password
+    if (password === '7984302453') {
+      setIsAuthenticated(true);
+      toast.success('Authentication successful!');
+    } else {
+      toast.error('Incorrect password. Please try again.');
     }
   };
 
@@ -90,25 +103,47 @@ const TestCaseSubmissionForm = () => {
         }
       `}</style>
 
-<Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="form-wrapper">
         <div className="form-content">
-          <h3>Test Case Submission</h3>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <InputField
-              label="Enter your test cases (JSON format)"
-              name="testCases"
-              value={testCases}
-              onChange={handleChange}
-              as="textarea"
-              rows={10}
-            />
-            <div className="button-container">
-              <button type="submit" className="button" disabled={isLoading}>
-                {isLoading ? 'Submitting...' : 'Submit Test Cases'}
-              </button>
-            </div>
-          </form>
+          {!isAuthenticated ? (
+            <>
+              <h3>Authentication Required</h3>
+              <form onSubmit={handleAuthentication} className="space-y-6">
+                <InputField
+                  label="Enter password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <div className="button-container">
+                  <button type="submit" className="button">
+                    Authenticate
+                  </button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <>
+              <h3>Test Case Submission</h3>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <InputField
+                  label="Enter your test cases (JSON format)"
+                  name="testCases"
+                  value={testCases}
+                  onChange={handleChange}
+                  as="textarea"
+                  rows={10}
+                />
+                <div className="button-container">
+                  <button type="submit" className="button" disabled={isLoading}>
+                    {isLoading ? 'Submitting...' : 'Submit Test Cases'}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>
